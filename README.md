@@ -39,6 +39,8 @@ brew install mpv
 
 ## Installation
 
+Note: this plugin ships the braille frame data and audio through Git LFS. The first install has to download about 260 MB of LFS assets, so it may take a few minutes depending on your network.
+
 ### lazy.nvim
 
 ```lua
