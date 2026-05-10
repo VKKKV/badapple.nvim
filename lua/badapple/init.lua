@@ -8,29 +8,29 @@ local api = vim.api
 local fn = vim.fn
 
 ---@class BadAppleConfig
----@field FRAME_WIDTH number Width of each frame in the source file
----@field FRAME_HEIGHT number Height of each frame in the source file
----@field SAMPLING_SCALE number Upscaling factor (1 = original size)
----@field PADDING number Space between code and animation mask
----@field FRAMES_PATH string Path to the frames file relative to rtp
----@field AUDIO_PATH string Path to the audio file relative to rtp
----@field AUDIO_ENABLED boolean Whether to play audio with mpv
----@field AUDIO_OFFSET number Animation start delay in milliseconds
----@field FPS number Frames per second
+---@field frame_width number Width of each frame in the source file
+---@field frame_height number Height of each frame in the source file
+---@field sampling_scale number Upscaling factor (1 = original size)
+---@field padding number Space between code and animation mask
+---@field frames_path string Path to the frames file relative to rtp
+---@field audio_path string Path to the audio file relative to rtp
+---@field audio_enabled boolean Whether to play audio with mpv
+---@field audio_offset number Animation start delay in milliseconds
+---@field fps number Frames per second
 
 ---@type BadAppleConfig
 local CONF = {
-    FRAME_WIDTH = 179,
-    FRAME_HEIGHT = 73,
-    SAMPLING_SCALE = 1,
-    PADDING = 2,
+    frame_width = 179,
+    frame_height = 73,
+    sampling_scale = 1,
+    padding = 2,
     -- Braille file
-    FRAMES_PATH = "lua/badapple/badapple.srt",
-    AUDIO_PATH = "lua/badapple/badapple.m4a",
-    AUDIO_ENABLED = true,
+    frames_path = "lua/badapple/badapple.srt",
+    audio_path = "lua/badapple/badapple.m4a",
+    audio_enabled = true,
     -- Audio offset (ms)
-    AUDIO_OFFSET = 3000,
-    FPS = 30,
+    audio_offset = 3000,
+    fps = 30,
 }
 
 ---@class BadAppleState
@@ -52,10 +52,38 @@ local state = {
     audio_job = 0,
 }
 
+local LEGACY_KEYS = {
+    FRAME_WIDTH = "frame_width",
+    FRAME_HEIGHT = "frame_height",
+    SAMPLING_SCALE = "sampling_scale",
+    PADDING = "padding",
+    FRAMES_PATH = "frames_path",
+    AUDIO_PATH = "audio_path",
+    AUDIO_ENABLED = "audio_enabled",
+    AUDIO_OFFSET = "audio_offset",
+    FPS = "fps",
+}
+
+---Normalizes legacy uppercase config keys to snake_case.
+---@param opts table
+---@return table
+local function normalize_config(opts)
+    local normalized = vim.deepcopy(opts)
+
+    for legacy_key, new_key in pairs(LEGACY_KEYS) do
+        if normalized[legacy_key] ~= nil and normalized[new_key] == nil then
+            normalized[new_key] = normalized[legacy_key]
+        end
+        normalized[legacy_key] = nil
+    end
+
+    return normalized
+end
+
 ---Configures the plugin.
 ---@param opts? table Partial config override
 function M.setup(opts)
-    opts = opts or {}
+    opts = normalize_config(opts or {})
     CONF = vim.tbl_deep_extend("force", CONF, opts)
 end
 
@@ -110,9 +138,9 @@ local function load_resources()
         return true
     end
 
-    local path = api.nvim_get_runtime_file(CONF.FRAMES_PATH, true)[1]
+    local path = api.nvim_get_runtime_file(CONF.frames_path, true)[1]
     if not path then
-        vim.notify("BadApple: Frames file missing at " .. CONF.FRAMES_PATH, vim.log.levels.ERROR)
+        vim.notify("BadApple: Frames file missing at " .. CONF.frames_path, vim.log.levels.ERROR)
         return false
     end
 
@@ -124,19 +152,19 @@ local function load_resources()
     fd:close()
 
     local raw_lines = split_lines(content)
-    local frame_h = CONF.FRAME_HEIGHT
+    local frame_h = CONF.frame_height
 
     local current_batch = {}
     for _, line in ipairs(raw_lines) do
         -- Pad short lines to ensure uniform frame width
         local char_count = fn.strchars(line)
-        if char_count < CONF.FRAME_WIDTH then
-            line = line .. string.rep(" ", CONF.FRAME_WIDTH - char_count)
+        if char_count < CONF.frame_width then
+            line = line .. string.rep(" ", CONF.frame_width - char_count)
         end
         table.insert(current_batch, line)
 
         if #current_batch == frame_h then
-            table.insert(state.cached_frames, pre_process_frame(current_batch, CONF.SAMPLING_SCALE))
+            table.insert(state.cached_frames, pre_process_frame(current_batch, CONF.sampling_scale))
             current_batch = {}
         end
     end
@@ -170,7 +198,7 @@ local function get_masked_frame(frame_lines, target_win)
         local buffer_line = buffer_lines[i]
 
         if buffer_line and #buffer_line > 0 then
-            mask_len = fn.strdisplaywidth(buffer_line) + CONF.PADDING
+            mask_len = fn.strdisplaywidth(buffer_line) + CONF.padding
         end
 
         if mask_len == 0 then
@@ -222,8 +250,8 @@ function M.start()
     wo.signcolumn = "no"
     wo.foldcolumn = "0"
 
-    if CONF.AUDIO_ENABLED then
-        local audio_file = api.nvim_get_runtime_file(CONF.AUDIO_PATH, true)[1]
+    if CONF.audio_enabled then
+        local audio_file = api.nvim_get_runtime_file(CONF.audio_path, true)[1]
 
         if audio_file then
             state.audio_job = vim.fn.jobstart({
@@ -260,7 +288,7 @@ function M.start()
         state.timer = loop.new_timer()
         state.timer:start(
             0,
-            math.floor(1000 / CONF.FPS),
+            math.floor(1000 / CONF.fps),
             vim.schedule_wrap(function()
                 if not state.is_running or not api.nvim_win_is_valid(state.win) then
                     M.stop()
@@ -278,7 +306,7 @@ function M.start()
                 end
             end)
         )
-    end, CONF.AUDIO_OFFSET) -- Wait for X ms
+    end, CONF.audio_offset) -- Wait for X ms
 end
 
 ---Stops the animation and cleans up resources.

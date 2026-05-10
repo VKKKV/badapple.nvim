@@ -20,7 +20,8 @@ LUA API                                                    *badapple-api*
 
 require("badapple").setup({opts})
         Configure the plugin. See README.md for all options.
-        Set AUDIO_ENABLED=false to play the animation without audio.
+        Set audio_enabled=false to play the animation without audio.
+        Uppercase option names are still accepted for backward compatibility.
 
 require("badapple").start()
         Start playback.

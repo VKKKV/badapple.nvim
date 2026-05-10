@@ -95,31 +95,33 @@ Default config:
 
 ```lua
 require("badapple").setup({
-  FRAME_WIDTH = 179,
-  FRAME_HEIGHT = 73,
-  SAMPLING_SCALE = 1,
-  PADDING = 2,
-  FRAMES_PATH = "lua/badapple/badapple.srt",
-  AUDIO_PATH = "lua/badapple/badapple.m4a",
-  AUDIO_ENABLED = true,
-  AUDIO_OFFSET = 3000,
-  FPS = 30,
+  frame_width = 179,
+  frame_height = 73,
+  sampling_scale = 1,
+  padding = 2,
+  frames_path = "lua/badapple/badapple.srt",
+  audio_path = "lua/badapple/badapple.m4a",
+  audio_enabled = true,
+  audio_offset = 3000,
+  fps = 30,
 })
 ```
 
+The old uppercase option names still work for backward compatibility, but new configs should use snake_case.
+
 Useful options:
 
-- `SAMPLING_SCALE`: enlarge frames for high-resolution terminals.
-- `PADDING`: extra columns kept clear around visible code.
-- `AUDIO_ENABLED`: set to `false` to play the animation without audio.
-- `AUDIO_OFFSET`: delay animation start so it syncs with audio.
-- `FPS`: playback frame rate.
+- `sampling_scale`: enlarge frames for high-resolution terminals.
+- `padding`: extra columns kept clear around visible code.
+- `audio_enabled`: set to `false` to play the animation without audio.
+- `audio_offset`: delay animation start so it syncs with audio.
+- `fps`: playback frame rate.
 
 Disable audio:
 
 ```lua
 require("badapple").setup({
-  AUDIO_ENABLED = false,
+  audio_enabled = false,
 })
 ```
 
@@ -153,7 +155,7 @@ from pathlib import Path
 from PIL import Image
 
 DOTS = [0x01, 0x02, 0x04, 0x40, 0x08, 0x10, 0x20, 0x80]
-FPS = 30
+fps = 30
 
 def ts(ms: int) -> str:
     total_seconds, milli = divmod(ms, 1000)
@@ -183,8 +185,8 @@ frames = sorted(Path("media/frames").glob("*.png"))
 out = Path("lua/badapple/badapple.srt")
 with out.open("w", encoding="utf-8") as f:
     for i, frame in enumerate(frames, 1):
-        start_ms = int((i - 1) * 1000 / FPS)
-        end_ms = int(i * 1000 / FPS)
+        start_ms = int((i - 1) * 1000 / fps)
+        end_ms = int(i * 1000 / fps)
         f.write(f"{i}\n")
         f.write(f"{ts(start_ms)} --> {ts(end_ms)}\n")
         f.write("\n".join(image_to_braille(frame)))
@@ -219,7 +221,7 @@ If the audio starts earlier than the animation, adjust:
 
 ```lua
 require("badapple").setup({
-  AUDIO_OFFSET = 3000,
+  audio_offset = 3000,
 })
 ```
 
@@ -227,7 +229,7 @@ If you do not want audio playback at all:
 
 ```lua
 require("badapple").setup({
-  AUDIO_ENABLED = false,
+  audio_enabled = false,
 })
 ```
 
