@@ -13,6 +13,9 @@ local fn = vim.fn
 ---@field SAMPLING_SCALE number Upscaling factor (1 = original size)
 ---@field PADDING number Space between code and animation mask
 ---@field FRAMES_PATH string Path to the frames file relative to rtp
+---@field AUDIO_PATH string Path to the audio file relative to rtp
+---@field AUDIO_ENABLED boolean Whether to play audio with mpv
+---@field AUDIO_OFFSET number Animation start delay in milliseconds
 ---@field FPS number Frames per second
 
 ---@type BadAppleConfig
@@ -24,6 +27,7 @@ local CONF = {
     -- Braille file
     FRAMES_PATH = "lua/badapple/badapple.srt",
     AUDIO_PATH = "lua/badapple/badapple.m4a",
+    AUDIO_ENABLED = true,
     -- Audio offset (ms)
     AUDIO_OFFSET = 3000,
     FPS = 30,
@@ -47,7 +51,6 @@ local state = {
     is_running = false,
     audio_job = 0,
 }
-
 
 ---Configures the plugin.
 ---@param opts? table Partial config override
@@ -219,28 +222,29 @@ function M.start()
     wo.signcolumn = "no"
     wo.foldcolumn = "0"
 
-    -- --- AUDIO SECTION ---
-    local audio_file = api.nvim_get_runtime_file(CONF.AUDIO_PATH, true)[1]
+    if CONF.AUDIO_ENABLED then
+        local audio_file = api.nvim_get_runtime_file(CONF.AUDIO_PATH, true)[1]
 
-    if audio_file then
-        state.audio_job = vim.fn.jobstart({
-            "mpv",
-            "--no-config",
-            "--no-video",
-            "--no-terminal",
-            audio_file,
-        }, {
-            on_exit = function()
-                -- Cleanup if audio finishes first (unlikely for loop, but good practice)
-                state.audio_job = 0
-            end,
-        })
+        if audio_file then
+            state.audio_job = vim.fn.jobstart({
+                "mpv",
+                "--no-config",
+                "--no-video",
+                "--no-terminal",
+                audio_file,
+            }, {
+                on_exit = function()
+                    -- Cleanup if audio finishes first (unlikely for loop, but good practice)
+                    state.audio_job = 0
+                end,
+            })
 
-        if state.audio_job <= 0 then
-            vim.notify("Warning: Failed to start mpv. Is it installed?", vim.log.levels.WARN)
+            if state.audio_job <= 0 then
+                vim.notify("Warning: Failed to start mpv. Is it installed?", vim.log.levels.WARN)
+            end
+        else
+            vim.notify("Warning: Audio file not found. Silence is golden anyway.", vim.log.levels.WARN)
         end
-    else
-        vim.notify("Warning: Audio file not found. Silence is golden anyway.", vim.log.levels.WARN)
     end
 
     state.is_running = true
@@ -304,6 +308,5 @@ function M.stop()
     state.win = -1
     state.buf = -1
 end
-
 
 return M

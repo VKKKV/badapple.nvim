@@ -101,6 +101,7 @@ require("badapple").setup({
   PADDING = 2,
   FRAMES_PATH = "lua/badapple/badapple.srt",
   AUDIO_PATH = "lua/badapple/badapple.m4a",
+  AUDIO_ENABLED = true,
   AUDIO_OFFSET = 3000,
   FPS = 30,
 })
@@ -110,8 +111,17 @@ Useful options:
 
 - `SAMPLING_SCALE`: enlarge frames for high-resolution terminals.
 - `PADDING`: extra columns kept clear around visible code.
+- `AUDIO_ENABLED`: set to `false` to play the animation without audio.
 - `AUDIO_OFFSET`: delay animation start so it syncs with audio.
 - `FPS`: playback frame rate.
+
+Disable audio:
+
+```lua
+require("badapple").setup({
+  AUDIO_ENABLED = false,
+})
+```
 
 ## Converting video to braille frames
 
@@ -210,6 +220,14 @@ If the audio starts earlier than the animation, adjust:
 ```lua
 require("badapple").setup({
   AUDIO_OFFSET = 3000,
+})
+```
+
+If you do not want audio playback at all:
+
+```lua
+require("badapple").setup({
+  AUDIO_ENABLED = false,
 })
 ```
 
