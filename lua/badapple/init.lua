@@ -22,8 +22,8 @@ local CONF = {
     SAMPLING_SCALE = 1,
     PADDING = 2,
     -- Braille file
-    FRAMES_PATH = "lua/badapple.srt",
-    AUDIO_PATH = "lua/badapple.m4a",
+    FRAMES_PATH = "lua/badapple/badapple.srt",
+    AUDIO_PATH = "lua/badapple/badapple.m4a",
     -- Audio offset (ms)
     AUDIO_OFFSET = 3000,
     FPS = 30,
@@ -47,6 +47,14 @@ local state = {
     is_running = false,
     audio_job = 0,
 }
+
+
+---Configures the plugin.
+---@param opts? table Partial config override
+function M.setup(opts)
+    opts = opts or {}
+    CONF = vim.tbl_deep_extend("force", CONF, opts)
+end
 
 ---Splits SRT content into raw frame lines, filtering out metadata.
 ---@param content string Raw SRT content
@@ -297,8 +305,5 @@ function M.stop()
     state.buf = -1
 end
 
--- Setup user commands
-api.nvim_create_user_command("BadAppleStart", M.start, { desc = "Start Bad Apple animation" })
-api.nvim_create_user_command("BadAppleStop", M.stop, { desc = "Stop Bad Apple animation" })
 
 return M

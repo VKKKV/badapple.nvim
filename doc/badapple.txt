@@ -1,0 +1,30 @@
+*badapple.nvim*        Play Bad Apple as braille animation in Neovim
+
+===============================================================================
+CONTENTS                                                   *badapple-contents*
+
+1. Commands                                                |badapple-commands|
+2. Lua API                                                 |badapple-api|
+
+===============================================================================
+COMMANDS                                                   *badapple-commands*
+
+:BadAppleStart                                             *:BadAppleStart*
+        Start the Bad Apple animation overlay.
+
+:BadAppleStop                                              *:BadAppleStop*
+        Stop playback and close the overlay.
+
+===============================================================================
+LUA API                                                    *badapple-api*
+
+require("badapple").setup({opts})
+        Configure the plugin. See README.md for all options.
+
+require("badapple").start()
+        Start playback.
+
+require("badapple").stop()
+        Stop playback.
+
+vim:tw=78:ts=8:ft=help:norl:
