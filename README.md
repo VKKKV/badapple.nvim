@@ -4,6 +4,12 @@ Play Bad Apple as a braille animation inside Neovim.
 
 The plugin opens a transparent floating window over the current editor window, renders pre-generated braille subtitle frames, and optionally plays the audio track with `mpv`.
 
+## Demo
+
+[neovim also needs Bad Apple!!](https://www.bilibili.com/video/BV1v2FUzLEMi/)
+
+GitHub README does not render Bilibili `<iframe>` embeds, so the demo is linked directly instead of embedded as an iframe.
+
 ## Features
 
 - Neovim floating-window overlay
